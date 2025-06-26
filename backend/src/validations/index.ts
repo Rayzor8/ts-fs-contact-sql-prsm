@@ -3,7 +3,9 @@ import { Request } from "express";
 import { ResponseError } from "../errors/response-error";
 
 const validate = (schema: Joi.ObjectSchema, request: Request) => {
-  const { value, error } = schema.validate(request);
+  const { value, error } = schema.validate(request,{
+    abortEarly: false
+  });
 
   if (error) throw new ResponseError(400, error.message);
 
