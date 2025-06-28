@@ -12,4 +12,15 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { register };
+const login = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await userService.login(req.body);
+    res.status(200).json({
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default { register, login };
