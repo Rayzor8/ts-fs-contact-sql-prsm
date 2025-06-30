@@ -2,6 +2,7 @@ import { prisma } from "../applications/database";
 import { ResponseError } from "../errors/response-error";
 import { validate } from "../validations";
 import {
+  getUserValidation,
   loginUserValidation,
   registerUserValidation,
 } from "../validations/user-validation";
@@ -70,4 +71,18 @@ const login = async (request: Request) => {
   });
 };
 
-export default { register, login };
+const getUser = async (username: string) => {
+  const validatedUser = validate(getUserValidation, username);
+
+  return prisma.user.findUnique({
+    where: {
+      username: validatedUser,
+    },
+    select: {
+      username: true,
+      name: true,
+    },
+  });
+};
+
+export default { register, login, getUser };

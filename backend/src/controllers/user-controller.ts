@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import userService from "../services/user-service";
+import { CustomRequest } from "../types/request-type";
+
 
 const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -23,4 +25,16 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { register, login };
+const get = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const username = (req as CustomRequest).user.username;
+    const result = await userService.getUser(username);
+    res.status(200).json({
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default { register, login, get };

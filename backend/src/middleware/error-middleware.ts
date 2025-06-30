@@ -10,9 +10,9 @@ const errorMiddleware = async (
   if (!error) return next();
 
   if (error instanceof ResponseError) {
-    res.status(error.status).json({ errors: error.message }).end();
+    res.status(error.status).json({ errors: error.message });
   } else {
-    res.status(500).json({ errors: error.message }).end();
+    res.status(500).json({ errors: error.message });
   }
 };
 

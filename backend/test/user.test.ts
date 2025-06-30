@@ -110,3 +110,36 @@ describe("POST /api/users/login", () => {
     expect(result.body.errors).toBeDefined();
   });
 });
+
+describe("GET /api/users/current", () => {
+  beforeEach(async () => {
+    await createTestUser();
+  });
+
+  afterEach(async () => {
+    await removeTestUser();
+  });
+
+  it("should can get current user", async () => {
+    const result = await supertest(web).get("/api/users/current").set({
+      authorization: "token",
+    });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.username).toBe("rayzor");
+    expect(result.body.data.name).toBe("Rayzordev");
+  });
+
+  it("should reject if token is invalid", async () => {
+    const result = await supertest(web).get("/api/users/current").set({
+      authorization: "invalid-token",
+    });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(401);
+    expect(result.body.errors).toBe("Unauthorized");
+  });
+});
