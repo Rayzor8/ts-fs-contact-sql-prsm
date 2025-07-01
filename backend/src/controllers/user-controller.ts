@@ -37,4 +37,15 @@ const get = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { register, login, get };
+const update = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await userService.updateUser(req.body);
+    res.status(200).json({
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default { register, login, get,update };

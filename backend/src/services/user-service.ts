@@ -5,6 +5,7 @@ import {
   getUserValidation,
   loginUserValidation,
   registerUserValidation,
+  updateUserValidation,
 } from "../validations/user-validation";
 import bycrpt from "bcrypt";
 import { Request } from "express";
@@ -72,11 +73,11 @@ const login = async (request: Request) => {
 };
 
 const getUser = async (username: string) => {
-  const validatedUser = validate(getUserValidation, username);
+  const user = validate(getUserValidation, username);
 
   return prisma.user.findUnique({
     where: {
-      username: validatedUser,
+      username: user,
     },
     select: {
       username: true,
@@ -85,4 +86,32 @@ const getUser = async (username: string) => {
   });
 };
 
-export default { register, login, getUser };
+const updateUser = async (request: Request) => {
+  const user = validate(updateUserValidation, request);
+
+  const totalUser = await prisma.user.count({
+    where: {
+      username: user.username,
+    },
+  });
+
+  if (totalUser === 0) throw new ResponseError(404, "User is not found");
+
+  const data: { name?: string; password?: string } = {};
+
+  if (user.name) data.name = user.name;
+  if (user.password) data.password = await bycrpt.hash(user.password, 10);
+
+  return prisma.user.update({
+    where: {
+      username: user.username,
+    },
+    data,
+    select: {
+      username: true,
+      name: true,
+    },
+  });
+};
+
+export default { register, login, getUser, updateUser };
