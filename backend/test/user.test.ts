@@ -211,8 +211,7 @@ describe("PATCH /api/users/current", () => {
     expect(result.status).toBe(200);
     expect(result.body.data.username).toBe("rayzor");
     const user = await getTestUser();
-    const userPassword = user!.password;
-    expect(await bcrypt.compare("updated password", userPassword)).toBe(true);
+    expect(await bcrypt.compare("updated password", user?.password as string)).toBe(true);
   });
 
   it("should reject if request body is invalid", async () => {
@@ -229,7 +228,7 @@ describe("PATCH /api/users/current", () => {
     expect(result.body.errors).toBeDefined();
   });
 
-  it("should reject if token is invalid", async () => {
+  it("should reject update if token is invalid", async () => {
     const result = await supertest(web)
       .patch("/api/users/current")
       .set({
@@ -240,6 +239,40 @@ describe("PATCH /api/users/current", () => {
         name: "updated name",
         password: "updated password",
       });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(401);
+    expect(result.body.errors).toBe("Unauthorized");
+  });
+});
+
+describe("DELETE /api/users/logout", () => {
+  beforeEach(async () => {
+    await createTestUser();
+  });
+
+  afterEach(async () => {
+    await removeTestUser();
+  });
+
+  it("should can logout", async () => {
+    const result = await supertest(web).delete("/api/users/logout").set({
+      authorization: "token",
+    });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBe("Success logout");
+    const user = await getTestUser();
+    expect(user?.token).toBeNull();
+  });
+
+  it("should reject logout if token is invalid", async () => {
+    const result = await supertest(web).delete("/api/users/logout").set({
+      authorization: "invalid-token",
+    });
 
     logger.info(result.body);
 

@@ -2,7 +2,6 @@ import { Request, Response, NextFunction } from "express";
 import userService from "../services/user-service";
 import { CustomRequest } from "../types/request-type";
 
-
 const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await userService.register(req.body);
@@ -48,4 +47,16 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { register, login, get,update };
+const logout = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const username = (req as CustomRequest).user.username;
+    await userService.logoutUser(username);
+    res.status(200).json({
+      data: "Success logout",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default { register, login, get, update, logout };
