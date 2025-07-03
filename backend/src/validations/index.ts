@@ -6,7 +6,7 @@ const validate = <T>(schema: Joi.AnySchema, request: T) => {
     abortEarly: false,
     allowUnknown: false,
   });
-  console.log(error);
+
   if (error) throw new ResponseError(400, error.message);
 
   return value;

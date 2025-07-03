@@ -14,4 +14,17 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { create };
+const get = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = (req as CustomRequest).user.username;
+    const contactId = Number(req.params.id);
+    const result = await contactService.getContact(user, contactId);
+    res.status(200).json({
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default { create, get };

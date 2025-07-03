@@ -1,6 +1,7 @@
 import prisma from "../src/applications/database";
 import bcrypt from "bcrypt";
 
+// Test user
 export const removeTestUser = async () => {
   await prisma.user.deleteMany({
     where: {
@@ -28,8 +29,30 @@ export const getTestUser = async () => {
   });
 };
 
+// Test contact
+
 export const removeAllTestContact = async () => {
   await prisma.contact.deleteMany({
+    where: {
+      username: "rayzor",
+    },
+  });
+};
+
+export const createTestContact = async () => {
+  await prisma.contact.create({
+    data: {
+      username: "rayzor",
+      first_name: "rayzor",
+      last_name: "dev",
+      email: "example@example.com",
+      phone: "08123456789",
+    },
+  });
+};
+
+export const getTestContact = async () => {
+  return await prisma.contact.findFirst({
     where: {
       username: "rayzor",
     },
