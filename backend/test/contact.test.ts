@@ -107,9 +107,86 @@ describe("GET /api/contacts/:id", () => {
   });
 
   it("should reject if id is invalid", async () => {
-    const result = await supertest(web).get(`/api/contacts/${Math.random() * 100}`).set({
-      authorization: "token",
-    });
+    const result = await supertest(web)
+      .get(`/api/contacts/${Math.random() * 100}`)
+      .set({
+        authorization: "token",
+      });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(404);
+    expect(result.body.errors).toBe("Contact is not found");
+  });
+});
+
+describe("PUT /api/contacts/:id", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestContact();
+  });
+
+  afterEach(async () => {
+    await removeAllTestContact();
+    await removeTestUser();
+  });
+
+  it("should be able to update existing contact", async () => {
+    const testContact = await getTestContact();
+    const result = await supertest(web)
+      .put(`/api/contacts/${testContact?.id}`)
+      .set({
+        authorization: "token",
+      })
+      .send({
+        first_name: "rayzor updated",
+        last_name: "dev updated",
+        email: "example-updated@example.com",
+        phone: "08123123123",
+      });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.id).toBe(testContact?.id);
+    expect(result.body.data.first_name).toBe("rayzor updated");
+    expect(result.body.data.last_name).toBe("dev updated");
+    expect(result.body.data.email).toBe("example-updated@example.com");
+    expect(result.body.data.phone).toBe("08123123123");
+  });
+
+  it("should reject if request body is invalid", async () => {
+    const testContact = await getTestContact();
+    const result = await supertest(web)
+      .put(`/api/contacts/${testContact?.id}`)
+      .set({
+        authorization: "token",
+      })
+      .send({
+        first_name: "",
+        last_name: "",
+        email: "",
+        phone: "",
+      });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(400);
+    expect(result.body.errors).toBeDefined();
+  });
+
+  it("should reject if contact is not found", async () => {
+    const result = await supertest(web)
+      .put(`/api/contacts/${Math.random() * 100}`)
+      .set({
+        authorization: "token",
+      })
+      .send({
+        first_name: "rayzor updated",
+        last_name: "dev updated",
+        email: "example-updated@example.com",
+        phone: "08123123123",
+      });
 
     logger.info(result.body);
 
