@@ -194,3 +194,45 @@ describe("PUT /api/contacts/:id", () => {
     expect(result.body.errors).toBe("Contact is not found");
   });
 });
+
+describe("DELETE /api/contacts/:id", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestContact();
+  });
+
+  afterEach(async () => {
+    await removeAllTestContact();
+    await removeTestUser();
+  });
+
+  it("should be able to delete existing contact", async () => {
+    let testContact = await getTestContact();
+    const result = await supertest(web)
+      .delete(`/api/contacts/${testContact?.id}`)
+      .set({
+        authorization: "token",
+      });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBe("Success remove contact");
+
+    testContact = await getTestContact();
+    expect(testContact).toBeNull();
+  });
+
+  it("should reject if contact is not found", async () => {
+    const result = await supertest(web)
+      .delete(`/api/contacts/${Math.random() * 100}`)
+      .set({
+        authorization: "token",
+      });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(404);
+    expect(result.body.errors).toBe("Contact is not found");
+  });
+});
