@@ -3,6 +3,7 @@ import { web } from "../src/applications/web";
 import supertest from "supertest";
 import { logger } from "../src/applications/logger";
 import {
+  createManyTestContact,
   createTestContact,
   createTestUser,
   getTestContact,
@@ -33,8 +34,6 @@ describe("POST /api/contacts", () => {
         phone: "08123456789",
       });
 
-    logger.info(result.body);
-
     expect(result.status).toBe(200);
     expect(result.body.data.id).toBeDefined();
     expect(result.body.data.first_name).toBe("rayzor");
@@ -50,8 +49,6 @@ describe("POST /api/contacts", () => {
         authorization: "token",
       })
       .send({});
-
-    logger.info(result.body);
 
     expect(result.status).toBe(400);
     expect(result.body.errors).toBeDefined();
@@ -69,8 +66,6 @@ describe("POST /api/contacts", () => {
         email: "example@example.com",
         phone: "123123213123123321312231123",
       });
-
-    logger.info(result.body);
 
     expect(result.status).toBe(400);
     expect(result.body.errors).toBeDefined();
@@ -96,8 +91,6 @@ describe("GET /api/contacts/:id", () => {
         authorization: "token",
       });
 
-    logger.info(result.body);
-
     expect(result.status).toBe(200);
     expect(result.body.data.id).toBe(testContact?.id);
     expect(result.body.data.first_name).toBe(testContact?.first_name);
@@ -112,8 +105,6 @@ describe("GET /api/contacts/:id", () => {
       .set({
         authorization: "token",
       });
-
-    logger.info(result.body);
 
     expect(result.status).toBe(404);
     expect(result.body.errors).toBe("Contact is not found");
@@ -145,8 +136,6 @@ describe("PUT /api/contacts/:id", () => {
         phone: "08123123123",
       });
 
-    logger.info(result.body);
-
     expect(result.status).toBe(200);
     expect(result.body.data.id).toBe(testContact?.id);
     expect(result.body.data.first_name).toBe("rayzor updated");
@@ -169,8 +158,6 @@ describe("PUT /api/contacts/:id", () => {
         phone: "",
       });
 
-    logger.info(result.body);
-
     expect(result.status).toBe(400);
     expect(result.body.errors).toBeDefined();
   });
@@ -187,8 +174,6 @@ describe("PUT /api/contacts/:id", () => {
         email: "example-updated@example.com",
         phone: "08123123123",
       });
-
-    logger.info(result.body);
 
     expect(result.status).toBe(404);
     expect(result.body.errors).toBe("Contact is not found");
@@ -214,8 +199,6 @@ describe("DELETE /api/contacts/:id", () => {
         authorization: "token",
       });
 
-    logger.info(result.body);
-
     expect(result.status).toBe(200);
     expect(result.body.data).toBe("Success remove contact");
 
@@ -230,9 +213,99 @@ describe("DELETE /api/contacts/:id", () => {
         authorization: "token",
       });
 
-    logger.info(result.body);
-
     expect(result.status).toBe(404);
     expect(result.body.errors).toBe("Contact is not found");
+  });
+});
+
+describe("GET /api/contacts", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createManyTestContact();
+  });
+
+  afterEach(async () => {
+    await removeAllTestContact();
+    await removeTestUser();
+  });
+
+  it("should can search without parameter", async () => {
+    const result = await supertest(web).get("/api/contacts").set({
+      authorization: "token",
+    });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.length).toBe(10);
+    expect(result.body.paging.page).toBe(1);
+    expect(result.body.paging.total_page).toBe(2);
+    expect(result.body.paging.total_item).toBe(15);
+  });
+
+  it("should can search to page 2", async () => {
+    const result = await supertest(web)
+      .get("/api/contacts?search=rayzor")
+      .set({
+        authorization: "token",
+      })
+      .query({ page: 2 });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.length).toBe(5);
+    expect(result.body.paging.page).toBe(2);
+    expect(result.body.paging.total_page).toBe(2);
+    expect(result.body.paging.total_item).toBe(15);
+  });
+
+  it("should can search by name", async () => {
+    const result = await supertest(web)
+      .get("/api/contacts")
+      .set({
+        authorization: "token",
+      })
+      .query({ name: "rayzor1" });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.length).toBe(6);
+    expect(result.body.paging.page).toBe(1);
+    expect(result.body.paging.total_page).toBe(1);
+    expect(result.body.paging.total_item).toBe(6);
+  });
+
+  it("should can search by email", async () => {
+    const result = await supertest(web)
+      .get("/api/contacts")
+      .set({
+        authorization: "token",
+      })
+      .query({ email: "example14@example.com" });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.length).toBe(1);
+    expect(result.body.paging.page).toBe(1);
+    expect(result.body.paging.total_page).toBe(1);
+    expect(result.body.paging.total_item).toBe(1);
+  });
+
+  it("should can search by phone", async () => {
+    const result = await supertest(web)
+      .get("/api/contacts")
+      .set({
+        authorization: "token",
+      })
+      .query({ phone: "080009001" });
+
+    logger.info(result.body);
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.length).toBe(6);
+    expect(result.body.paging.page).toBe(1);
+    expect(result.body.paging.total_page).toBe(1);
+    expect(result.body.paging.total_item).toBe(6);
   });
 });
