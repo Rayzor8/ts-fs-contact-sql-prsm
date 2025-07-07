@@ -72,3 +72,13 @@ export const getTestContact = async () => {
     },
   });
 };
+
+export const removeAllTestAddress = async () => {
+  await prisma.address.deleteMany({
+    where: {
+      contact: {
+        username: "rayzor",
+      },
+    },
+  });
+};
