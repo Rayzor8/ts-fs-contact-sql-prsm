@@ -3,8 +3,10 @@ import { web } from "../src/applications/web";
 import supertest from "supertest";
 import { logger } from "../src/applications/logger";
 import {
+  createTestAddress,
   createTestContact,
   createTestUser,
+  getTestAddress,
   getTestContact,
   removeAllTestAddress,
   removeAllTestContact,
@@ -86,5 +88,64 @@ describe("POST /api/contacts/:id/addresses", () => {
 
     expect(result.status).toBe(404);
     expect(result.body.errors).toBe("Contact is not found");
+  });
+});
+
+describe("GET /api/contacts/:id/addresses", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestContact();
+    await createTestAddress();
+  });
+
+  afterEach(async () => {
+    await removeAllTestAddress();
+    await removeAllTestContact();
+    await removeTestUser();
+  });
+
+  it("should can get address", async () => {
+    const testContact = await getTestContact();
+    const testAddress = await getTestAddress();
+
+    const result = await supertest(web)
+      .get(`/api/contacts/${testContact?.id}/addresses/${testAddress?.id}`)
+      .set({
+        authorization: "token",
+      });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.id).toBe(testAddress?.id);
+    expect(result.body.data.street).toBe(testAddress?.street);
+    expect(result.body.data.city).toBe(testAddress?.city);
+    expect(result.body.data.province).toBe(testAddress?.province);
+    expect(result.body.data.country).toBe(testAddress?.country);
+    expect(result.body.data.postal_code).toBe(testAddress?.postal_code);
+  });
+
+  it("should reject if contact id is invalid", async () => {
+    const testAddress = await getTestAddress();
+
+    const result = await supertest(web)
+      .get(`/api/contacts/${Math.random() * 100}/addresses/${testAddress?.id}`)
+      .set({
+        authorization: "token",
+      });
+
+    expect(result.status).toBe(404);
+    expect(result.body.errors).toBe("Contact is not found");
+  });
+
+  it("should reject if address id is invalid", async () => {
+    const testContact = await getTestContact();
+
+    const result = await supertest(web)
+      .get(`/api/contacts/${testContact?.id}/addresses/${Math.random() * 100}`)
+      .set({
+        authorization: "token",
+      });
+
+    expect(result.status).toBe(404);
+    expect(result.body.errors).toBe("Address is not found");
   });
 });

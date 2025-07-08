@@ -1,3 +1,4 @@
+import { ResponseError } from "../src/errors/response-error";
 import prisma from "../src/applications/database";
 import bcrypt from "bcrypt";
 
@@ -79,6 +80,32 @@ export const removeAllTestAddress = async () => {
       contact: {
         username: "rayzor",
       },
+    },
+  });
+};
+
+export const createTestAddress = async () => {
+  const contact = await getTestContact();
+
+  if (!contact) throw new ResponseError(404, "Contact is not found");
+
+  return await prisma.address.create({
+    data: {
+      contact_id: contact.id,
+      street: "street 1",
+      city: "city 1",
+      province: "province 1",
+      country: "country 1",
+      postal_code: "12345",
+    },
+  });
+};
+
+export const getTestAddress = async () => {
+  const contact = await getTestContact();
+  return await prisma.address.findFirst({
+    where: {
+      contact_id: contact?.id,
     },
   });
 };
