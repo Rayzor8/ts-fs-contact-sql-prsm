@@ -17,7 +17,7 @@ const create = async (req: Request, res: Response, next: NextFunction) => {
 const get = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = (req as CustomRequest).user.username;
-    const contactId = Number(req.params.id);
+    const contactId = Number(req.params.contactId);
     const result = await contactService.getContact(user, contactId);
     res.status(200).json({
       data: result,
@@ -30,7 +30,7 @@ const get = async (req: Request, res: Response, next: NextFunction) => {
 const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = (req as CustomRequest).user.username;
-    const contactId = Number(req.params.id);
+    const contactId = Number(req.params.contactId);
     const request = { id: contactId, ...req.body };
 
     const result = await contactService.updateContact(user, request);
@@ -45,7 +45,7 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
 const remove = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = (req as CustomRequest).user.username;
-    const contactId = Number(req.params.id);
+    const contactId = Number(req.params.contactId);
     await contactService.removeContact(user, contactId);
     res.status(200).json({
       data: "Success remove contact",
