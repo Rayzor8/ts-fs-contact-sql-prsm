@@ -67,4 +67,17 @@ const remove = async (req: Request, res: Response, next: NextFunction) => {
   }
 };
 
-export default { create, get, update, remove };
+const list = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const user = (req as CustomRequest).user.username;
+    const contactId = Number(req.params.contactId);
+    const result = await addressService.listAddress(user, contactId);
+    res.status(200).json({
+      data: result,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default { create, get, update, remove, list };

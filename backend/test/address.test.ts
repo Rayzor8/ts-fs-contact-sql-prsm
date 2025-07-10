@@ -91,7 +91,7 @@ describe("POST /api/contacts/:contactId/addresses", () => {
   });
 });
 
-describe("GET /api/contacts/:contactId/addresses", () => {
+describe("GET /api/contacts/:contactId/addresses/:addressId", () => {
   beforeEach(async () => {
     await createTestUser();
     await createTestContact();
@@ -292,5 +292,47 @@ describe("DELETE /api/contacts/:contactId/addresses/:addressId", () => {
 
     expect(result.status).toBe(404);
     expect(result.body.errors).toBe("Address is not found");
+  });
+});
+
+
+describe("GET /api/contacts/:contactId/addresses", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestContact();
+    await createTestAddress();
+  });
+
+  afterEach(async () => {
+    await removeAllTestAddress();
+    await removeAllTestContact();
+    await removeTestUser();
+  });
+
+  it("should can get list address", async () => {
+    const testContact = await getTestContact();
+
+    const result = await supertest(web)
+      .get(`/api/contacts/${testContact?.id}/addresses`)
+      .set({
+        authorization: "token",
+      });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data.length).toBe(1);
+  });
+
+
+  it("should reject if contact id is invalid", async () => {
+    const testAddress = await getTestAddress();
+
+    const result = await supertest(web)
+      .get(`/api/contacts/${Math.random() * 100}/addresses/${testAddress?.id}`)
+      .set({
+        authorization: "token",
+      });
+
+    expect(result.status).toBe(404);
+    expect(result.body.errors).toBe("Contact is not found");
   });
 });
