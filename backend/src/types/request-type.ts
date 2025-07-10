@@ -7,8 +7,8 @@ export interface CustomRequest extends Request {
 }
 
 export interface SearchContactRequest {
-  page?: string;
-  size?: string;
+  page: string | number;
+  size: string | number;
   name?: string;
   email?: string;
   phone?: string;

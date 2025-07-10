@@ -13,7 +13,7 @@ import {
   removeTestUser,
 } from "./utils";
 
-describe("POST /api/contacts/:id/addresses", () => {
+describe("POST /api/contacts/:contactId/addresses", () => {
   beforeEach(async () => {
     await createTestUser();
     await createTestContact();
@@ -91,7 +91,7 @@ describe("POST /api/contacts/:id/addresses", () => {
   });
 });
 
-describe("GET /api/contacts/:id/addresses", () => {
+describe("GET /api/contacts/:contactId/addresses", () => {
   beforeEach(async () => {
     await createTestUser();
     await createTestContact();
@@ -150,7 +150,7 @@ describe("GET /api/contacts/:id/addresses", () => {
   });
 });
 
-describe("PUT /api/contacts/:id/addresses/:id", () => {
+describe("PUT /api/contacts/:contactId/addresses/:addressId", () => {
   beforeEach(async () => {
     await createTestUser();
     await createTestContact();
@@ -235,5 +235,62 @@ describe("PUT /api/contacts/:id/addresses/:id", () => {
 
     expect(result.status).toBe(400);
     expect(result.body.errors).toBeDefined();
+  });
+});
+
+describe("DELETE /api/contacts/:contactId/addresses/:addressId", () => {
+  beforeEach(async () => {
+    await createTestUser();
+    await createTestContact();
+    await createTestAddress();
+  });
+
+  afterEach(async () => {
+    await removeAllTestAddress();
+    await removeAllTestContact();
+    await removeTestUser();
+  });
+
+  it("should be able to delete existing address", async () => {
+    const testContact = await getTestContact();
+    let testAddress = await getTestAddress();
+
+    const result = await supertest(web)
+      .delete(`/api/contacts/${testContact?.id}/addresses/${testAddress?.id}`)
+      .set({
+        authorization: "token",
+      });
+
+    expect(result.status).toBe(200);
+    expect(result.body.data).toBe("Success remove address");
+
+    testAddress = await getTestAddress();
+    expect(testAddress).toBeNull();
+  });
+
+  it("should reject if contact id is invalid", async () => {
+    const testAddress = await getTestAddress();
+
+    const result = await supertest(web)
+      .get(`/api/contacts/${Math.random() * 100}/addresses/${testAddress?.id}`)
+      .set({
+        authorization: "token",
+      });
+
+    expect(result.status).toBe(404);
+    expect(result.body.errors).toBe("Contact is not found");
+  });
+
+  it("should reject if address id is invalid", async () => {
+    const testContact = await getTestContact();
+
+    const result = await supertest(web)
+      .get(`/api/contacts/${testContact?.id}/addresses/${Math.random() * 100}`)
+      .set({
+        authorization: "token",
+      });
+
+    expect(result.status).toBe(404);
+    expect(result.body.errors).toBe("Address is not found");
   });
 });

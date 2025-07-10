@@ -72,7 +72,7 @@ describe("POST /api/contacts", () => {
   });
 });
 
-describe("GET /api/contacts/:id", () => {
+describe("GET /api/contacts/:contactId", () => {
   beforeEach(async () => {
     await createTestUser();
     await createTestContact();
@@ -111,7 +111,7 @@ describe("GET /api/contacts/:id", () => {
   });
 });
 
-describe("PUT /api/contacts/:id", () => {
+describe("PUT /api/contacts/:contactId", () => {
   beforeEach(async () => {
     await createTestUser();
     await createTestContact();
@@ -180,7 +180,7 @@ describe("PUT /api/contacts/:id", () => {
   });
 });
 
-describe("DELETE /api/contacts/:id", () => {
+describe("DELETE /api/contacts/:contactId", () => {
   beforeEach(async () => {
     await createTestUser();
     await createTestContact();
