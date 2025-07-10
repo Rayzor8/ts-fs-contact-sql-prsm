@@ -4,7 +4,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "node --import=tsx --env-file=.env --watch src/main.ts",
-    "test": "jest -i"
+    "test": "jest -i",
+    "build": "tsc",
+    "start": "node --env-file=.env  dist/main.js"
   },
   "keywords": [],
   "author": "",
